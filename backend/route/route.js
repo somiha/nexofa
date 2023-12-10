@@ -1,9 +1,19 @@
 const userRoute = require("./userRoute");
+const sessionRoute = require("./sessionRoute");
+const topicRoute = require("./topicRoute");
 
 const routes = [
   {
     path: "/api/auth",
     handler: userRoute,
+  },
+  {
+    path: "/api/",
+    handler: sessionRoute,
+  },
+  {
+    path: "/api/",
+    handler: topicRoute,
   },
   {
     path: "/",

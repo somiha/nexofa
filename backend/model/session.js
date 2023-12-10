@@ -6,6 +6,9 @@ module.exports = (sequelize, DataTypes) => {
     user_id: {
       type: DataTypes.INTEGER,
     },
+    completed: {
+      type: DataTypes.DOUBLE,
+    },
     topic_id: {
       type: DataTypes.INTEGER,
     },

@@ -50,8 +50,8 @@ db.topic = require("./topic")(sequelize, DataTypes);
 // db.user.hasMany(db.session, { foreignKey: "user_id" });
 // db.session.belongsTo(db.user, { foreignKey: "user_id" });
 
-db.session.hasOne(db.user, { foreignKey: "user_id" });
-db.user.belongsTo(db.session, { foreignKey: "user_id" });
+// db.session.hasOne(db.user, { foreignKey: "user_id" });
+// db.user.belongsTo(db.session, { foreignKey: "user_id" });
 
 db.session.hasOne(db.topic, { foreignKey: "topic_id" });
 db.topic.belongsTo(db.session, { foreignKey: "topic_id" });

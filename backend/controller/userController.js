@@ -8,6 +8,11 @@ const jwt = require("jsonwebtoken");
 
 const seacret = "alskfjdfoiawenf23";
 
+const fs = require("fs").promises;
+const path = require("path");
+
+const multiUpload = require("./../middleware/multiupload");
+
 exports.register = async (req, res, next) => {
   try {
     const {
@@ -135,6 +140,69 @@ exports.updatePassword = async (req, res, next) => {
       .json({ msg: "Password has been updated successfully." });
   } catch (err) {
     console.log(err);
+    return res.status(500).json({
+      msg: "Something went wrong. Please try again with correct information.",
+    });
+  }
+};
+
+exports.updateProfile = async (req, res, next) => {
+  try {
+    const { name, email, mobile_number, country } = req.body;
+    const userId = req.query.userId;
+    console.log(userId);
+    console.log(req.body);
+
+    const user = await User.findOne({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      return res.status(401).json({ msg: "You are not authorized." });
+    }
+
+    user.name = name || user.name;
+    user.email = email || user.email;
+    user.mobile_number = mobile_number || user.mobile_number;
+    user.country = country || user.country;
+
+    // Handle profile picture update
+    multiUpload.single("profile_pic")(req, res, async (err) => {
+      if (err) {
+        console.error(err);
+        return res
+          .status(500)
+          .json({ msg: "Error uploading profile picture." });
+      }
+
+      // Check if a file was uploaded
+      if (req.file) {
+        const profilePicPath = path.join(
+          __dirname,
+          "../public/uploads",
+          user.profile_pic
+        );
+
+        // Delete old profile picture if exists
+        if (user.profile_pic) {
+          await fs.unlink(profilePicPath);
+        }
+
+        // Save new profile picture path to the user
+        user.profile_pic = req.file.filename;
+      }
+
+      // Save the updated user profile
+      await user.save();
+
+      return res
+        .status(200)
+        .json({ msg: "Profile has been updated successfully." });
+    });
+  } catch (err) {
+    console.error(err);
     return res.status(500).json({
       msg: "Something went wrong. Please try again with correct information.",
     });
