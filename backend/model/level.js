@@ -3,12 +3,15 @@ module.exports = (sequelize, DataTypes) => {
     level_name: {
       type: DataTypes.STRING,
     },
-    level_pic: {
-      type: DataTypes.STRING,
-    },
     message: {
       type: DataTypes.STRING,
     },
+    topic_id: {
+      type: DataTypes.INTEGER,
+    },
   });
+  Level.associate = (models) => {
+    Level.belongsTo(models.Topic, { foreignKey: "topic_id" });
+  };
   return Level;
 };

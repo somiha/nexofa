@@ -7,5 +7,8 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
     },
   });
+  Topic.associate = (models) => {
+    Topic.hasMany(models.Level, { foreignKey: "topic_id" });
+  };
   return Topic;
 };

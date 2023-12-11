@@ -3,18 +3,24 @@ module.exports = (sequelize, DataTypes) => {
     session_name: {
       type: DataTypes.STRING,
     },
+    description: {
+      type: DataTypes.STRING,
+    },
     user_id: {
+      type: DataTypes.INTEGER,
+    },
+    topic_id: {
       type: DataTypes.INTEGER,
     },
     completed: {
       type: DataTypes.DOUBLE,
     },
-    topic_id: {
-      type: DataTypes.INTEGER,
-    },
-    description: {
-      type: DataTypes.STRING,
-    },
   });
+
+  Session.associate = (models) => {
+    Session.belongsTo(models.User, { foreignKey: "user_id" });
+    Session.belongsTo(models.Topic, { foreignKey: "topic_id" });
+  };
+
   return Session;
 };

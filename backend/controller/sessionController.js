@@ -2,39 +2,77 @@ const db = require("../model/database");
 const User = db.user;
 const Topic = db.topic;
 const Session = db.session;
+const Level = db.level;
+const SessionLevel = db.sessionLevel;
 const Op = require("sequelize").Op;
 
 exports.addSession = async (req, res, next) => {
   try {
-    const { session_name, topic_id, description, completed, user_id } =
-      req.body;
+    const { session_name, description, completed } = req.body;
 
-    const user = req.query.userId;
-    const topic = req.query.topicId;
+    const user_id = req.query.userId;
+    const topic_id = req.query.topicId;
 
-    console.log(user);
+    const existingUser = await User.findByPk(user_id);
 
-    if (!user) {
+    if (!existingUser) {
       return res.status(400).json({ msg: "User not found" });
     }
+
+    const existingTopic = await Topic.findByPk(topic_id);
+
+    if (!existingTopic) {
+      return res.status(400).json({ msg: "Topic not found" });
+    }
+
     const newSession = await Session.create({
       session_name,
-      topic_id: topic,
-      user_id: user,
+      topic_id: topic_id,
+      user_id: user_id,
       description,
       completed,
     });
 
     const createdSession = await Session.findByPk(newSession.id);
 
-    return res
-      .status(200)
-      .json({ msg: "Session created successfully", session: createdSession });
+    const levels = await Level.findAll({
+      where: {
+        topic_id: topic_id,
+      },
+    });
+
+    const sessionLevels = await createSessionLevels(levels, createdSession);
+
+    return res.status(200).json({
+      msg: "Session and levels created successfully",
+      session: createdSession,
+      levels: sessionLevels,
+    });
   } catch (e) {
     console.error(e);
+
+    if (e.name === "SequelizeForeignKeyConstraintError") {
+      return res
+        .status(400)
+        .json({ msg: "Invalid user_id or topic_id. User or Topic not found." });
+    }
+
     return res.status(500).json({ msg: "Something went wrong" });
   }
 };
+
+async function createSessionLevels(levels, createdSession) {
+  const sessionLevels = await Promise.all(
+    levels.map(async (level) => {
+      return await SessionLevel.create({
+        level_id: level.id,
+        session_id: createdSession.id,
+      });
+    })
+  );
+
+  return sessionLevels;
+}
 
 exports.getSessionsByUserId = async (req, res, next) => {
   try {

@@ -46,6 +46,10 @@ db.customer = require("./customer")(sequelize, DataTypes);
 db.user = require("./user")(sequelize, DataTypes);
 db.session = require("./session")(sequelize, DataTypes);
 db.topic = require("./topic")(sequelize, DataTypes);
+db.level = require("./level")(sequelize, DataTypes);
+db.sessionLevel = require("./session_level")(sequelize, DataTypes);
+db.question = require("./question")(sequelize, DataTypes);
+db.answer = require("./questionAnswer")(sequelize, DataTypes);
 // topics session relation
 // db.user.hasMany(db.session, { foreignKey: "user_id" });
 // db.session.belongsTo(db.user, { foreignKey: "user_id" });
@@ -53,11 +57,17 @@ db.topic = require("./topic")(sequelize, DataTypes);
 // db.session.hasOne(db.user, { foreignKey: "user_id" });
 // db.user.belongsTo(db.session, { foreignKey: "user_id" });
 
-db.session.hasOne(db.topic, { foreignKey: "topic_id" });
-db.topic.belongsTo(db.session, { foreignKey: "topic_id" });
+// db.session.hasOne(db.topic, { foreignKey: "topic_id" });
+// db.topic.belongsTo(db.session, { foreignKey: "topic_id" });
 
-db.topic.hasMany(db.session, { foreignKey: "topic_id" });
-db.session.belongsTo(db.topic, { foreignKey: "topic_id" });
+// db.topic.hasMany(db.session, { foreignKey: "topic_id" });
+// db.session.belongsTo(db.topic, { foreignKey: "topic_id" });
+
+// db.level.hasOne(db.session, { foreignKey: "session_id" });
+// db.session.belongsTo(db.level, { foreignKey: "session_id" });
+
+// db.session.hasMany(db.level, { foreignKey: "session_id" });
+// db.level.belongsTo(db.session, { foreignKey: "session_id" });
 
 // one to many relation between customer table and transaction table
 // db.customer.hasMany(db.transaction, { foreignKey: "customerId" });

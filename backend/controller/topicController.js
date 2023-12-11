@@ -28,3 +28,12 @@ exports.addTopic = async (req, res, next) => {
     return res.status(500).json({ msg: "Internal Server Error" });
   }
 };
+
+exports.getAllTopics = async (req, res, next) => {
+  try {
+    const topics = await Topic.findAll();
+    return res.status(200).json({ topics });
+  } catch (err) {
+    return res.status(500).json({ msg: "Something went wrong" });
+  }
+};
