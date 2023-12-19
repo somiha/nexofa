@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/css/output.css" />
+        <title>Nexofa</title>
+    </head>
+
+    <body class="flex min-h-screen bg-base-200">
+        <!-- sidebar section -->
+        <div
+            class="absolute translate-x-[-100%] lg:translate-x-0 lg:sticky h-[100vh] top-0 z-[100] flex flex-col p-10 py-10 border sidebar bg-base-100">
+            <div class="flex justify-between">
+                <img src="/img/logo.png" class="w-fit h-fit" alt="" />
+                <button class="btn btn-sm lg:hidden btn-outline btn-primary sidebar-close">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <ul class="flex flex-col mt-10 font-medium text-base-300 gap-y-5">
+                <li class="p-2 ps-0">
+                    <a href="./index.html" class="flex items-center gap-x-3">
+                        <i class="bi bi-layout-text-sidebar-reverse text-base-icon"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="p-2 ps-0">
+                    <a href="./AllUser.html" class="flex items-center gap-x-3">
+                        <i class="bi bi-people-fill text-base-icon"></i>
+                        All User
+                    </a>
+                </li>
+                <li class="p-2 ps-0">
+                    <a href="./AllTopics.html" class="flex items-center gap-x-3">
+                        <i class="bi bi-file-earmark-diff-fill"></i>
+                        Add Topic
+                    </a>
+                </li>
+                <li class="p-2 ps-0">
+                    <a href="./AllQuestions.html" class="flex items-center gap-x-3">
+                        <i class="bi bi-question-square-fill"></i>
+                        Add Question
+                    </a>
+                </li>
+                <li class="p-2 ps-0">
+                    <a href="" class="flex items-center gap-x-3">
+                        <i class="bi bi-bar-chart-fill"></i>
+                        Add Level
+                    </a>
+                </li>
+                <li class="p-2 ps-0">
+                    <a href="./Settings.html" class="flex items-center gap-x-3">
+                        <i class="bi bi-gear-fill"></i>
+                        Settings
+                    </a>
+                </li>
+                <li class="p-2 ps-0">
+                    <a href="./AllMessage.html" class="flex items-center gap-x-3">
+                        <i class="bi bi-chat-left-text-fill"></i>
+                        Messages
+                    </a>
+                </li>
+                <li class="p-2 ps-0">
+                    <a href="./Premium.html" class="flex items-center gap-x-3">
+                        <i class="bi bi-coin"></i>
+                        Premium
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!-- main body section -->
+        <div class="main-body">
+            <div class="w-full bg-base-100 h-[10vh] flex justify-end lg:px-10 px-5">
+                <div class="flex items-center justify-between w-full lg:justify-end">
+                    <button class="btn btn-sm lg:hidden sidebar-opener btn-outline btn-primary">
+                        <i class="bi bi-justify"></i>
+                    </button>
+                    <div class="flex items-center gap-x-3">
+                        <img src="./img/pro-pic.png" class="w-10 h-10 rounded-full" alt="" />
+                        <p class="font-semibold">Admin</p>
+                    </div>
+                </div>
+            </div>

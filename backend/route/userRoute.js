@@ -13,7 +13,7 @@ router.post("/login", login);
 router.post("/update-password", auth, updatePassword);
 router.post(
   "/update-profile",
-  auth,
+
   multiUpload.fields([{ name: "profile_pic" }]),
   updateProfile
 );

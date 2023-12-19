@@ -37,3 +37,35 @@ exports.getAllTopics = async (req, res, next) => {
     return res.status(500).json({ msg: "Something went wrong" });
   }
 };
+
+exports.updateTopic = async (req, res, next) => {
+  try {
+    const topic_id = req.query.topic_id;
+    const { topic_name } = req.body;
+    const topic_pic = req.files["topic_pic"];
+
+    const existingTopic = await Topic.findByPk(topic_id);
+
+    if (!existingTopic) {
+      return res.status(400).json({ msg: "Topic not found" });
+    }
+
+    let topicImageUrl = existingTopic.topic_pic;
+
+    if (topic_pic && topic_pic.length > 0) {
+      topicImageUrl = `${baseUrl}/uploads/${topic_pic[0].filename}`;
+    }
+
+    existingTopic.topic_name = topic_name;
+    existingTopic.topic_pic = topicImageUrl;
+
+    await existingTopic.save();
+
+    return res
+      .status(200)
+      .json({ msg: "Topic updated successfully", topic: existingTopic });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ msg: "Internal Server Error" });
+  }
+};

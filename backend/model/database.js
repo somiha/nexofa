@@ -50,6 +50,49 @@ db.level = require("./level")(sequelize, DataTypes);
 db.sessionLevel = require("./session_level")(sequelize, DataTypes);
 db.question = require("./question")(sequelize, DataTypes);
 db.answer = require("./questionAnswer")(sequelize, DataTypes);
+db.contact = require("./contact_us")(sequelize, DataTypes);
+db.package = require("./package")(sequelize, DataTypes);
+db.tryPackage = require("./tryPackage")(sequelize, DataTypes);
+db.info = require("./info")(sequelize, DataTypes);
+db.social = require("./socialMedia")(sequelize, DataTypes);
+
+db.package.belongsTo(db.user, { foreignKey: "user_id", onDelete: "CASCADE" });
+db.user.hasMany(db.package, { foreignKey: "user_id", onDelete: "CASCADE" });
+
+db.tryPackage.belongsTo(db.user, {
+  foreignKey: "user_id",
+  onDelete: "CASCADE",
+});
+db.user.hasMany(db.tryPackage, { foreignKey: "user_id", onDelete: "CASCADE" });
+
+db.answer.belongsTo(db.user, { foreignKey: "user_id", onDelete: "CASCADE" });
+db.answer.belongsTo(db.sessionLevel, {
+  foreignKey: "session_level_id",
+  onDelete: "CASCADE",
+});
+db.answer.belongsTo(db.question, {
+  foreignKey: "question_id",
+  onDelete: "CASCADE",
+});
+
+db.sessionLevel.belongsTo(db.session, {
+  foreignKey: "session_id",
+  onDelete: "CASCADE",
+});
+db.sessionLevel.belongsTo(db.level, {
+  foreignKey: "level_id",
+  onDelete: "CASCADE",
+});
+
+db.question.belongsTo(db.level, {
+  foreignKey: "level_id",
+  onDelete: "CASCADE",
+});
+db.question.belongsTo(db.topic, {
+  foreignKey: "topic_id",
+  onDelete: "CASCADE",
+});
+
 // topics session relation
 // db.user.hasMany(db.session, { foreignKey: "user_id" });
 // db.session.belongsTo(db.user, { foreignKey: "user_id" });

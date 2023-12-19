@@ -1,5 +1,6 @@
 const e = require("express");
 const db = require("../model/database");
+
 const User = db.user;
 const Topic = db.topic;
 const Session = db.session;
@@ -19,7 +20,11 @@ exports.addQuestion = async (req, res, next) => {
       },
     });
 
-    if (level.topic_id !== topic_id) {
+    console.log("Provided level_id:", level_id);
+    console.log("Provided topic_id:", topic_id);
+    console.log("Fetched level:", level.dataValues.topic_id);
+
+    if (level.dataValues.topic_id != topic_id) {
       return res.status(400).json({ msg: "this level not in this topic" });
     }
 
@@ -46,6 +51,20 @@ exports.addQuestion = async (req, res, next) => {
   }
 };
 
+// exports.getQuestionsByLevel = async (req, res, next) => {
+//   try {
+//     const level_id = req.query.level_id;
+//     const questions = await Question.findAll({
+//       where: {
+//         level_id,
+//       },
+//     });
+//     return res.status(200).json({ questions });
+//   } catch (err) {
+//     return res.status(500).json({ msg: "Internal Server Error" });
+//   }
+// };
+
 exports.getQuestionsByLevel = async (req, res, next) => {
   try {
     const level_id = req.query.level_id;
@@ -53,9 +72,43 @@ exports.getQuestionsByLevel = async (req, res, next) => {
       where: {
         level_id,
       },
+      include: [
+        {
+          model: Topic,
+          attributes: ["topic_name"],
+          as: "topic",
+        },
+      ],
     });
+
     return res.status(200).json({ questions });
   } catch (err) {
+    console.error(err);
+    return res.status(500).json({ msg: "Internal Server Error" });
+  }
+};
+
+exports.updateQuestion = async (req, res, next) => {
+  try {
+    const question_id = req.query.question_id;
+    const { question, suggested_answer } = req.body;
+
+    const existingQuestion = await Question.findByPk(question_id);
+
+    if (!existingQuestion) {
+      return res.status(400).json({ msg: "Level not found" });
+    }
+
+    existingQuestion.question = question;
+    existingQuestion.suggested_answer = suggested_answer;
+
+    await existingQuestion.save();
+
+    return res
+      .status(200)
+      .json({ msg: "Level updated successfully", question: existingQuestion });
+  } catch (e) {
+    console.error(e);
     return res.status(500).json({ msg: "Internal Server Error" });
   }
 };

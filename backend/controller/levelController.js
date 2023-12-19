@@ -9,20 +9,14 @@ exports.addLevel = async (req, res, next) => {
   try {
     const topic_id = req.query.topic_id;
     const { level_name, message } = req.body;
-    // const level_pic = req.files["level_pic"];
+
     console.log(1);
     console.log(req.body);
     const existingTopic = await Topic.findByPk(topic_id);
-    // console.log(existingSession);
+
     if (!existingTopic) {
       return res.status(400).json({ msg: "Topic not found" });
     }
-
-    // let levelImageUrl = null;
-
-    // if (level_pic && level_pic.length > 0) {
-    //   levelImageUrl = `${baseUrl}/uploads/${level_pic[0].filename}`;
-    // }
 
     const newLevel = await Level.create({
       level_name,
@@ -44,7 +38,7 @@ exports.getLevelsByTopic = async (req, res, next) => {
     const topic_id = req.query.topic_id;
 
     if (!topic_id) {
-      return res.status(400).json({ msg: "Session ID not provided" });
+      return res.status(400).json({ msg: "Topic ID not provided" });
     }
     const topic = await Topic.findByPk(topic_id);
 
@@ -77,5 +71,30 @@ exports.getAllLevels = async (req, res, next) => {
   } catch (e) {
     console.error("Error in getAllLevels:", e);
     return res.status(500).json({ msg: "Something went wrong" });
+  }
+};
+
+exports.updateLevel = async (req, res, next) => {
+  try {
+    const level_id = req.query.level_id;
+    const { level_name, message } = req.body;
+
+    const existingLevel = await Level.findByPk(level_id);
+
+    if (!existingLevel) {
+      return res.status(400).json({ msg: "Level not found" });
+    }
+
+    existingLevel.level_name = level_name;
+    existingLevel.message = message;
+
+    await existingLevel.save();
+
+    return res
+      .status(200)
+      .json({ msg: "Level updated successfully", level: existingLevel });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ msg: "Internal Server Error" });
   }
 };

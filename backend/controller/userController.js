@@ -12,6 +12,7 @@ const fs = require("fs").promises;
 const path = require("path");
 
 const multiUpload = require("./../middleware/multiupload");
+const baseUrl = process.env.baseUrl;
 
 exports.register = async (req, res, next) => {
   try {
@@ -150,6 +151,7 @@ exports.updateProfile = async (req, res, next) => {
   try {
     const { name, email, mobile_number, country } = req.body;
     const userId = req.query.userId;
+
     console.log(userId);
     console.log(req.body);
 
@@ -169,38 +171,34 @@ exports.updateProfile = async (req, res, next) => {
     user.country = country || user.country;
 
     // Handle profile picture update
-    multiUpload.single("profile_pic")(req, res, async (err) => {
-      if (err) {
-        console.error(err);
-        return res
-          .status(500)
-          .json({ msg: "Error uploading profile picture." });
-      }
+    const profile_pic = req.files["profile_pic"];
 
-      // Check if a file was uploaded
-      if (req.file) {
+    if (profile_pic && profile_pic.length > 0) {
+      const filename = profile_pic[0].filename;
+
+      const profileImageUrl = `${baseUrl}/uploads/${profile_pic[0].filename}`;
+
+      if (user.profile_pic) {
         const profilePicPath = path.join(
           __dirname,
           "../public/uploads",
-          user.profile_pic
+          path.basename(user.profile_pic)
         );
 
         // Delete old profile picture if exists
-        if (user.profile_pic) {
-          await fs.unlink(profilePicPath);
-        }
-
-        // Save new profile picture path to the user
-        user.profile_pic = req.file.filename;
+        await fs.unlink(profilePicPath);
       }
 
-      // Save the updated user profile
-      await user.save();
+      // Save new profile picture path to the user
+      user.profile_pic = profileImageUrl;
+    }
 
-      return res
-        .status(200)
-        .json({ msg: "Profile has been updated successfully." });
-    });
+    // Save the updated user profile
+    await user.save();
+
+    return res
+      .status(200)
+      .json({ msg: "Profile has been updated successfully." });
   } catch (err) {
     console.error(err);
     return res.status(500).json({

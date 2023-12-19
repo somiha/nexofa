@@ -1,0 +1,158 @@
+<%- include('../partials/navigation.ejs') %>
+<div class="flex flex-col p-5 lg:p-10">
+    <!-- statistics section -->
+    <div class="grid p-5 text-white lg:p-10 lg:grid-cols-3 bg-primary rounded-xl">
+        <div class="flex flex-col justify-center py-5 border-b border-white lg:border-b-0 lg:border-e">
+            <p class="text-sm">Total App User</p>
+            <p class="text-4xl font-bold"><%= userCount %></p>
+        </div>
+        <div
+            class="flex flex-col justify-center px-0 py-5 border-b border-white lg:px-5 lg:p-5 lg:items-center lg:border-b-0 lg:border-e">
+            <p class="text-sm">Total Premium Check User</p>
+            <p class="text-4xl font-bold"><%= premiumButtonUserCount %></p>
+        </div>
+        <div class="flex flex-col justify-center py-5 lg:px-10 lg:items-end">
+            <div>
+                <p class="text-sm">Total Premium Buy Button Click</p>
+                <p class="text-4xl font-bold"><%= premiumUserCount %></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- pagination section -->
+    <div
+        class="flex flex-col items-center justify-between order-last p-5 mt-5 lg:flex-row gap-y-5 lg:order-none lg:mt-0">
+        <p class="flex items-center text-base-400 gap-x-2">
+            Showing of 20 of 1200 users
+        </p>
+        <div class="join gap-x-1">
+            <button class="page">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="page page-active">1</button>
+            <button class="page">2</button>
+            <button class="page">3</button>
+            <button class="page">4</button>
+            <button class="page">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- filter section -->
+    <div class="flex flex-col justify-end mt-5 lg:mt-0 gap-y-2 lg:flex-row">
+        <select class="bg-transparent border-gray-300 select select-bordered focus:outline-none">
+            <option disabled selected>Filter by data range</option>
+        </select>
+    </div>
+
+    <dialog id="my_modal_5" class="modal">
+        <div class="modal-box">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onclick="closeDialog()">✕</button>
+            <form action="/update-user" method="POST" enctype="multipart/form-data">
+
+
+
+                <h3 class="font-bold text-lg mb-4">Edit User Info</h3>
+                <input class="w-full input input-bordered focus:outline-none focus:shadow-outline" type="text"
+                    id="edit_id" name="edit_id" hidden />
+
+                <div class="pb-5 ">
+                    <p class="mb-2 text-tColor3">User Name</p>
+                    <input class="w-full input input-bordered focus:outline-none focus:shadow-outline" type="text"
+                        id="edit_name" name="edit_name" placeholder="User Name" />
+                </div>
+                <div class="pb-5">
+                    <p class="mb-2 text-tColor3">User Phone Number</p>
+                    <input class="w-full textarea textarea-bordered focus:outline-none focus:shadow-outline"
+                        id="edit_phone_number" name="edit_phone_number" rows="4" cols="50"
+                        placeholder="User Phone Number" required />
+                </div>
+                <div class="pb-5">
+                    <p class="mb-2 text-tColor3">User Email</p>
+                    <input class="w-full textarea textarea-bordered focus:outline-none focus:shadow-outline"
+                        id="edit_email" name="edit_email" rows="4" cols="50" placeholder="User Email" required />
+                </div>
+                <div class="pb-5">
+                    <p class="mb-2 text-tColor3">User Country</p>
+                    <input class="w-full textarea textarea-bordered focus:outline-none focus:shadow-outline"
+                        id="edit_country" name="edit_country" rows="4" cols="50" placeholder="User Country" required />
+                </div>
+
+                <input id="edit-profile-pic" name="profile_pic" type="file"
+                    class="file-input file-input-bordered file-input-primary w-full max-w-xs mb-5" accept="image/*" />
+
+                <button type="submit" class="primary-btn">Submit</button>
+            </form>
+
+
+
+        </div>
+    </dialog>
+
+    <!-- table section -->
+    <div class="mt-5 lg:mt-10 bg-base-100 rounded-xl">
+        <div class="overflow-x-auto rounded-lg bg-base-100">
+            <table class="table table-lg border-[#d1d1d1]">
+                <!-- head -->
+                <thead>
+                    <tr class="border-[#E9E7FD] uppercase text-base-400">
+                        <th>no</th>
+                        <th>name</th>
+                        <th>email address</th>
+                        <th>mobile number</th>
+                        <th>country</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let user of users) { %>
+                    <tr class="border-none">
+                        <td><%= user.id %></td>
+                        <td class="h-full font-bold gap-x-2">
+                            <img class="inline-block me-2" src="<%= user.profile_pic %>" alt="" />
+                            <%= user.name %>
+                        </td>
+                        <td><%= user.email %></td>
+                        <td class="items-center"><%= user.phone_number %></td>
+                        <td><%= user.country %></td>
+
+                        <td>
+                            <button class="table-button btn btn-xs btn-outline btn-primary"
+                                onclick="openEditModal('<%= user.id %>', `<%= user.name %>`, `<%= user.phone_number %>`, `<%= user.email %>`, `<%= user.country %>`)"><i
+                                    class="bi bi-pencil"></i>
+                            </button>
+                            <a class="btn hover:text-black btn-sm btn-outline lg:btn-ghost">
+                                <i class="text-xl bi bi-three-dots"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+
+<script src="/js/index.js"></script>
+<script>
+    function closeDialog() {
+        var dialog = document.getElementById('my_modal_5');
+        dialog.close();
+    }
+    async function openEditModal(id, name, phone_number, email, country) {
+        console.log(id, name, phone_number, email, country);
+        document.getElementById('edit_name').value = name;
+        document.getElementById("edit_phone_number").value = phone_number;
+        document.getElementById("edit_email").value = email;
+        document.getElementById("edit_country").value = country;
+        document.getElementById("edit_id").value = id;
+        // Open the dialog
+        const editModal = document.getElementById('my_modal_5');
+        editModal.showModal();
+    }
+</script>
+</body>
+
+</html>

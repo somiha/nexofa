@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
   SessionLevel.associate = (models) => {
+    SessionLevel.belongsTo(models.Session, { foreignKey: "session_id" });
     SessionLevel.belongsTo(models.Level, { foreignKey: "level_id" });
     SessionLevel.belongsTo(models.Session, { foreignKey: "session_id" });
   };
