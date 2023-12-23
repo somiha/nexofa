@@ -46,7 +46,8 @@ exports.register = async (req, res, next) => {
 
     let hashPassword = await bcrypt.hash(password, 10);
 
-    const verification_code = Math.floor(1000 + Math.random() * 9000);
+    // const verification_code = Math.floor(1000 + Math.random() * 9000);
+    const verification_code = 1234;
 
     const newUser = await User.create({
       name,
@@ -62,7 +63,7 @@ exports.register = async (req, res, next) => {
     if (newUser) {
       return res
         .status(200)
-        .json({ msg: "User has been created successfully." });
+        .json({ msg: "User has been created successfully.", user: newUser });
     }
   } catch (err) {
     return res.status(500).json({ msg: "Account Creation Failed." });
@@ -95,7 +96,7 @@ exports.login = async (req, res, next) => {
 
     const token = jwt.sign({ id: user.id, name: user.name }, seacret);
 
-    return res.status(200).json({ token });
+    return res.status(200).json({ token, user: user });
   } catch (err) {
     return res.status(500).json({ msg: "something wrong" });
   }
@@ -138,7 +139,7 @@ exports.updatePassword = async (req, res, next) => {
 
     return res
       .status(200)
-      .json({ msg: "Password has been updated successfully." });
+      .json({ msg: "Password has been updated successfully.", user: user });
   } catch (err) {
     console.log(err);
     return res.status(500).json({
@@ -198,9 +199,103 @@ exports.updateProfile = async (req, res, next) => {
 
     return res
       .status(200)
-      .json({ msg: "Profile has been updated successfully." });
+      .json({ msg: "Profile has been updated successfully.", user: user });
   } catch (err) {
     console.error(err);
+    return res.status(500).json({
+      msg: "Something went wrong. Please try again with correct information.",
+    });
+  }
+};
+
+exports.forgetPasswordSentCode = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) {
+      return req.status(200).json({ msg: "User Not Found with this email." });
+    }
+    // const verification_code = Math.floor(1000 + Math.random() * 9000);
+    const verification_code = "1234";
+
+    user.verification_code = verification_code;
+
+    await user.save();
+
+    return res.status(200).json({ msg: "Code has been sent to your email." });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      msg: "Something went wrong. Please try again with correct information.",
+    });
+  }
+};
+
+exports.confirmCode = async (req, res, next) => {
+  try {
+    const { email, code } = req.body;
+    const user = await User.findOne({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) {
+      return req.status(200).json({ msg: "User Not Found with this email." });
+    }
+
+    if (user.verification_code != code) {
+      return res.status(400).json({ msg: "Invalid Code" });
+    }
+
+    return res.status(200).json({ msg: "Successfully verified user." });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      msg: "Something went wrong. Please try again with correct information.",
+    });
+  }
+};
+
+exports.createPassword = async (req, res, next) => {
+  try {
+    const { email, new_password, confirmed_password } = req.body;
+    const user = await User.findOne({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) {
+      return res.status(401).json({ msg: "No user found with this email." });
+    }
+
+    if (new_password !== confirmed_password) {
+      return res.status(400).json({ msg: "Password did't match." });
+    }
+
+    let hashPassword = await bcrypt.hash(new_password, 10);
+
+    const updatedUser = await User.update(
+      { password: hashPassword },
+      {
+        where: {
+          email: email,
+        },
+      }
+    );
+
+    return res.status(200).json({
+      msg: "Password has been updated successfully.",
+      user: updatedUser,
+    });
+  } catch (err) {
+    console.log(err);
     return res.status(500).json({
       msg: "Something went wrong. Please try again with correct information.",
     });

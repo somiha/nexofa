@@ -10,7 +10,13 @@ exports.addLevel = async (req, res, next) => {
     const topic_id = req.query.topic_id;
     const { level_name, message } = req.body;
 
-    console.log(1);
+    const level_pic = req.files["level_pic"];
+
+    let levelImageUrl = null;
+
+    if (level_pic && level_pic.length > 0) {
+      levelImageUrl = `${baseUrl}/uploads/${level_pic[0].filename}`;
+    }
     console.log(req.body);
     const existingTopic = await Topic.findByPk(topic_id);
 
@@ -21,6 +27,7 @@ exports.addLevel = async (req, res, next) => {
     const newLevel = await Level.create({
       level_name,
       message,
+      level_pic: levelImageUrl,
       topic_id: topic_id,
     });
 
@@ -78,15 +85,20 @@ exports.updateLevel = async (req, res, next) => {
   try {
     const level_id = req.query.level_id;
     const { level_name, message } = req.body;
-
+    const level_pic = req.files["level_pic"];
     const existingLevel = await Level.findByPk(level_id);
 
     if (!existingLevel) {
       return res.status(400).json({ msg: "Level not found" });
     }
+    let levelImageUrl = existingLevel.level_pic;
 
+    if (level_pic && level_pic.length > 0) {
+      levelImageUrl = `${baseUrl}/uploads/${level_pic[0].filename}`;
+    }
     existingLevel.level_name = level_name;
     existingLevel.message = message;
+    existingLevel.level_pic = levelImageUrl;
 
     await existingLevel.save();
 

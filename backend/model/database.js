@@ -55,6 +55,7 @@ db.package = require("./package")(sequelize, DataTypes);
 db.tryPackage = require("./tryPackage")(sequelize, DataTypes);
 db.info = require("./info")(sequelize, DataTypes);
 db.social = require("./socialMedia")(sequelize, DataTypes);
+db.notification = require("./notification")(sequelize, DataTypes);
 
 db.package.belongsTo(db.user, { foreignKey: "user_id", onDelete: "CASCADE" });
 db.user.hasMany(db.package, { foreignKey: "user_id", onDelete: "CASCADE" });

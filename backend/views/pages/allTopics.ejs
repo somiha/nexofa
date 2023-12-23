@@ -1,0 +1,95 @@
+<%- include('../partials/navigation.ejs') %>
+
+<div class="p-5 lg:p-10">
+    <div class="flex justify-between pb-10 border-b">
+        <p class="text-3xl font-semibold text-base-300">Topics</p>
+        <button class="flex items-center text-white lg:px-10 gap-x-3 btn btn-primary addTopicOpen">
+            <i class="bi bi-plus"></i>
+            <p>Add Topics</p>
+        </button>
+    </div>
+    <div class="grid gap-5 mt-10 lg:gap-16 lg:grid-cols-4">
+        <% for (let topic of topics) { %>
+        <div class="flex flex-col p-5 border rounded bg-base-100">
+            <img src="<%= topic.topic_pic %>" class="w-fit" alt="" />
+            <p class="mt-5 text-xl font-semibold"><%= topic.topic_name %></p>
+            <p class="text-base-400"><%= topic.topic_des %></p>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Add topic Sidebar -->
+<div class="absolute h-full w-[100%] lg:w-[30%] bg-base-100 right-0 top-0 shadow-card flex flex-col py-10 px-5 translate-x-[100%]"
+    id="addTopicSidebar">
+    <form action="/add-topic" method="POST" enctype="multipart/form-data">
+        <div class="flex items-center justify-between">
+            <p class="text-xl font-semibold">Add Topics</p>
+            <button class="rounded-full btn btn-ghost addTopicClose">
+                <i class="text-xl bi bi-x-circle-fill"></i>
+            </button>
+        </div>
+        <p class="mt-3 text-base-400 w-[80%]">
+            You only need to enter the basic information when you create the
+            categories.
+        </p>
+        <div class="flex flex-col mt-10 gap-y-3">
+            <label for="">Topic Name</label>
+            <input type="text" class="border-gray-400 input input-bordered" id="topic_name" name="topic_name"
+                placeholder="eg something" />
+        </div>
+        <div class="flex flex-col mt-5 gap-y-3">
+            <label for="">Topic's Description</label>
+            <textarea type="text" class="h-40 border-gray-400 textarea textarea-bordered" id="topic_des"
+                name="topic_des" placeholder="eg something"></textarea>
+        </div>
+        <div class="flex flex-col mt-5 gap-y-3">
+
+
+
+            <div class="mt-5">
+                <label for="topic_pic" id="label-text"
+                    class="p-3 text-center border border-dashed rounded-lg cursor-pointer border-primary text-primary btn">
+                    <div class="flex items-center gap-5">
+                        <i class="text-xl bi bi-file-plus"></i>
+                        <p class="text-sm text-center text-primaryColor">Click here or drop svg, png</p>
+                    </div>
+                    <input id="topic_pic" type="file" name="topic_pic" class="hidden"
+                        onchange="displaySelectedImage()" />
+                </label>
+            </div>
+
+            <p id="selected-image-name" class="mt-3 text-tColor2"></p>
+            <img id="selected-image" src="#" alt="" width="100px" height="100px" class="hidden" />
+        </div>
+
+        <button class="mt-10 text-white btn btn-primary">Publish</button>
+    </form>
+</div>
+</div>
+
+<script src="js/index.js"></script>
+<script>
+    function displaySelectedImage() {
+        const fileInput = document.getElementById("topic_pic");
+        const labelText = document.getElementById("label-text");
+        const selectedImageName = document.getElementById("selected-image-name");
+        const selectedImage = document.getElementById("selected-image");
+
+        if (fileInput.files.length > 0) {
+            labelText.style.display = "none";
+            const imageName = fileInput.files[0].name;
+            selectedImageName.textContent = `Selected Image: ${imageName}`;
+            selectedImage.src = URL.createObjectURL(fileInput.files[0]);
+            selectedImage.classList.remove("hidden");
+        } else {
+            labelText.style.display = "block";
+            selectedImageName.textContent = "";
+            selectedImage.src = "";
+            selectedImage.classList.add("hidden");
+        }
+    }
+</script>
+</body>
+
+</html>

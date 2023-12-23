@@ -6,7 +6,7 @@ const baseUrl = process.env.baseUrl;
 
 exports.addTopic = async (req, res, next) => {
   try {
-    const { topic_name } = req.body;
+    const { topic_name, topic_des } = req.body;
     const topic_pic = req.files["topic_pic"];
 
     let topicImageUrl = null;
@@ -18,6 +18,7 @@ exports.addTopic = async (req, res, next) => {
     const newTopic = await Topic.create({
       topic_name,
       topic_pic: topicImageUrl,
+      topic_des,
     });
 
     return res
@@ -41,7 +42,7 @@ exports.getAllTopics = async (req, res, next) => {
 exports.updateTopic = async (req, res, next) => {
   try {
     const topic_id = req.query.topic_id;
-    const { topic_name } = req.body;
+    const { topic_name, topic_des } = req.body;
     const topic_pic = req.files["topic_pic"];
 
     const existingTopic = await Topic.findByPk(topic_id);
@@ -58,6 +59,7 @@ exports.updateTopic = async (req, res, next) => {
 
     existingTopic.topic_name = topic_name;
     existingTopic.topic_pic = topicImageUrl;
+    existingTopic.topic_des = topic_des;
 
     await existingTopic.save();
 

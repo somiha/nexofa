@@ -10,6 +10,7 @@ const tryPackageRoute = require("./tryPackageRoute");
 const infoRoute = require("./infoRoute");
 const socialRoute = require("./socialRoute");
 const adminRoute = require("./adminRoute/adminRoute");
+const notificationRoute = require("./notificationRoute");
 
 const routes = [
   {
@@ -55,6 +56,10 @@ const routes = [
   {
     path: "/api/social",
     handler: socialRoute,
+  },
+  {
+    path: "/api/notification",
+    handler: notificationRoute,
   },
   {
     path: "",

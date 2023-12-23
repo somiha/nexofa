@@ -8948,6 +8948,12 @@ input.input-sm {
 .mt-5 {
   margin-top: 1.25rem;
 }
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
 
 .box-border {
   box-sizing: border-box;
@@ -10441,7 +10447,9 @@ input.input-sm {
 .font-semibold {
   font-weight: 600;
 }
-
+.leading-9 {
+  line-height: 3rem;
+}
 .uppercase {
   text-transform: uppercase;
 }

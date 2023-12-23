@@ -1,0 +1,98 @@
+<%- include('../partials/navigation.ejs') %>
+<div class="flex flex-col p-5 lg:p-10">
+    <form id="settingsForm" action="/update-links" method="POST">
+        <div class="flex flex-col justify-end order-last mt-5 lg:order-first gap-y-2 lg:flex-row">
+            <button id="saveButton" class="px-10 text-white btn bg-base-400 hover:bg-primary">
+                Save
+            </button>
+        </div>
+        <p class="mt-5 text-xl font-semibold">Social Media Informations</p>
+        <!-- <div class="grid mt-10 lg:grid-cols-2 gap-x-10 gap-y-5">
+        <div class="flex flex-col gap-y-3">
+            <label for="">Facebook Link</label>
+            <input type="text" class="bg-transparent border-gray-400 input input-bordered" placeholder="eg something" />
+        </div>
+        <div class="flex flex-col gap-y-3">
+            <label for="">Twitter Link</label>
+            <input type="text" class="bg-transparent border-gray-400 input input-bordered" placeholder="eg something" />
+        </div>
+        <div class="flex flex-col gap-y-3">
+            <label for="">Linkedin Link</label>
+            <input type="text" class="bg-transparent border-gray-400 input input-bordered" placeholder="eg something" />
+        </div>
+        <div class="flex flex-col gap-y-3">
+            <label for="">Whatsapp Link</label>
+            <input type="text" class="bg-transparent border-gray-400 input input-bordered" placeholder="eg something" />
+        </div>
+        <div class="flex flex-col gap-y-3">
+            <label for="">Instagram Link</label>
+            <input type="text" class="bg-transparent border-gray-400 input input-bordered" placeholder="eg something" />
+        </div>
+    </div> -->
+
+
+
+
+        <div class="grid mt-10 lg:grid-cols-2 gap-x-10 gap-y-5">
+            <% const socialLabels = ['Facebook', 'Twitter', 'Linkedin', 'Whatsapp', 'Instagram']; %>
+
+            <% socialLabels.forEach(label => { %>
+            <div class="flex flex-col gap-y-3">
+                <label for="<%= label.toLowerCase() %>Link"><%= label %> Link</label>
+
+                <% const socialInfo = infos.find(info => info.name.toLowerCase() === label.toLowerCase()); %>
+
+                <input type="text" class="bg-transparent border-gray-400 input input-bordered"
+                    id="<%= label.toLowerCase() %>Link" name="<%= label.toLowerCase() %>Link"
+                    placeholder="e.g. something" <% if (socialInfo) { %>value="<%= socialInfo.url %>" <% } %> />
+            </div>
+            <% }); %>
+        </div>
+
+
+        <p class="mt-16 text-xl font-semibold">Other Informations</p>
+
+        <div class="lg:w-[50%] flex flex-col">
+            <div class="flex flex-col mt-5 gap-y-3">
+                <label for="">About Us</label>
+                <textarea type="text" class="h-32 bg-transparent border-gray-400 textarea textarea-bordered"
+                    placeholder="eg something"></textarea>
+            </div>
+            <div class="flex flex-col mt-5 gap-y-3">
+                <label for="">Terms & Policy</label>
+                <textarea type="text" class="h-32 bg-transparent border-gray-400 textarea textarea-bordered"
+                    placeholder="eg something"></textarea>
+            </div>
+            <div class="flex flex-col mt-5 gap-y-3">
+                <label for="">Contact Us</label>
+                <textarea type="text" class="h-32 bg-transparent border-gray-400 textarea textarea-bordered"
+                    placeholder="eg something"></textarea>
+            </div>
+        </div>
+    </form>
+</div>
+</div>
+
+<script src="js/index.js"></script>
+
+
+</body>
+
+</html>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const saveButton = document.getElementById('saveButton');
+        const settingsForm = document.getElementById('settingsForm');
+
+        // Attach a click event listener to the Save button
+        saveButton.addEventListener('click', (event) => {
+            // Prevent the default form submission
+            event.preventDefault();
+
+            // Trigger the form submission programmatically
+            settingsForm.submit();
+        });
+    });
+
+</script>

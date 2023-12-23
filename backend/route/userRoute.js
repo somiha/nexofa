@@ -4,6 +4,9 @@ const {
   login,
   updatePassword,
   updateProfile,
+  forgetPasswordSentCode,
+  confirmCode,
+  createPassword,
 } = require("../controller/userController");
 const auth = require("../middleware/auth");
 const multiUpload = require("../middleware/multiupload");
@@ -17,5 +20,9 @@ router.post(
   multiUpload.fields([{ name: "profile_pic" }]),
   updateProfile
 );
+
+router.post("/forget-password", forgetPasswordSentCode);
+router.post("/confirm-code", confirmCode);
+router.post("/create-new-password", createPassword);
 
 module.exports = router;

@@ -10,8 +10,6 @@ const { Sequelize } = require("sequelize");
 
 exports.addSession = async (req, res, next) => {
   try {
-    const { session_name, description, completed } = req.body;
-
     const user_id = req.query.userId;
     const topic_id = req.query.topicId;
 
@@ -34,11 +32,11 @@ exports.addSession = async (req, res, next) => {
     });
 
     const newSession = await Session.create({
-      session_name,
+      session_name: existingTopic.topic_name,
       topic_id: topic_id,
       user_id: user_id,
-      description,
-      completed,
+      description: existingTopic.topic_des,
+      completed: 0,
       numberOfLevel: numberOfLevels,
     });
 

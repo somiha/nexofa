@@ -6,6 +6,9 @@ module.exports = (sequelize, DataTypes) => {
     message: {
       type: DataTypes.STRING,
     },
+    level_pic: {
+      type: DataTypes.STRING,
+    },
     topic_id: {
       type: DataTypes.INTEGER,
     },

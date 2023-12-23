@@ -1,0 +1,95 @@
+<%- include('../partials/navigation.ejs') %>
+<div class="flex flex-col p-5 lg:p-10">
+    <!-- pagination section -->
+    <div class="flex flex-col items-center justify-between order-last mt-10 lg:mt-0 lg:order-first lg:flex-row gap-y-5">
+        <p class="flex items-center text-base-400 gap-x-2">
+            Showing of 20 of 1200 users
+        </p>
+        <div class="join gap-x-1">
+            <button class="page">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="page page-active">1</button>
+            <button class="page">2</button>
+            <button class="page">3</button>
+            <button class="page">4</button>
+            <button class="page">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- filter section -->
+    <div class="flex flex-col justify-end mt-5 gap-y-2 lg:flex-row">
+        <select class="bg-transparent border-gray-300 select select-bordered focus:outline-none">
+            <option disabled selected>Filter by data range</option>
+        </select>
+    </div>
+    <dialog id="my_modal_1" class="modal">
+        <div class="modal-box">
+            <form method="dialog">
+                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+            </form>
+
+            <div class="pb-5">
+                <h6 class="mb-2 text-tColor3">Message</h6>
+                <p id="message" name="message" style="text-align:justify"></p>
+            </div>
+
+        </div>
+    </dialog>
+    <!-- table section -->
+    <div class="mt-5 bg-base-100">
+        <div class="overflow-x-auto rounded-lg bg-base-100">
+            <table class="table table-lg border-[#d1d1d1]">
+                <!-- head -->
+                <thead>
+                    <tr class="border-[#E9E7FD] uppercase text-base-400">
+                        <th></th>
+                        <th>name</th>
+                        <th>email address</th>
+                        <th>mobile number</th>
+                        <th>country</th>
+                        <th>message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let contact of contacts) { %>
+                    <tr class="border-none">
+                        <td><%= contact.id %></td>
+                        <td class="h-full font-bold gap-x-2">
+                            <!-- <img class="inline-block me-2" src="./img/pro-pic.png" alt="" /> -->
+                            <%= contact.name %>
+                        </td>
+                        <td><%= contact.email %></td>
+                        <td class="items-center"><%= contact.phone_number %></td>
+                        <td><%= contact.country %></td>
+                        <td class="line-clamp-1 leading-9 w-full"><%= contact.message %></td>
+                        <td>
+                            <button class="table-button btn btn-xs btn-outline btn-primary"
+                                onclick="openMessageDetialsModal(`<%= contact.message %>`)"><i
+                                    class="bi bi-eye"></i></button>
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+
+<script src="js/index.js"></script>
+
+<script>
+    async function openMessageDetialsModal(message) {
+        console.log(message);
+        document.getElementById('message').innerHTML = message;
+
+        const detailsModal = document.getElementById('my_modal_1');
+        detailsModal.showModal();
+    }
+</script>
+</body>
+
+</html>
