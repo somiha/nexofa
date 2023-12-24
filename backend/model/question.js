@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
     question: {
       type: DataTypes.STRING,
     },
-    suggested_answer: {
+    suggested_answers: {
       type: DataTypes.STRING,
     },
     topic_id: {
