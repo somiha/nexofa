@@ -21,7 +21,7 @@ exports.addLevel = async (req, res, next) => {
     const existingTopic = await Topic.findByPk(topic_id);
 
     if (!existingTopic) {
-      return res.status(400).json({ msg: "Topic not found" });
+      return res.status(400).json({ status: false, msg: "Topic not found" });
     }
 
     const newLevel = await Level.create({
@@ -31,12 +31,16 @@ exports.addLevel = async (req, res, next) => {
       topic_id: topic_id,
     });
 
-    return res
-      .status(200)
-      .json({ msg: "Level created successfully", level: newLevel });
+    return res.status(200).json({
+      status: true,
+      msg: "Level created successfully",
+      level: newLevel,
+    });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ status: false, msg: "Internal Server Error" });
   }
 };
 
@@ -45,12 +49,14 @@ exports.getLevelsByTopic = async (req, res, next) => {
     const topic_id = req.query.topic_id;
 
     if (!topic_id) {
-      return res.status(400).json({ msg: "Topic ID not provided" });
+      return res
+        .status(400)
+        .json({ status: false, msg: "Topic ID not provided" });
     }
     const topic = await Topic.findByPk(topic_id);
 
     if (!topic) {
-      return res.status(400).json({ msg: "Topic not found" });
+      return res.status(400).json({ status: false, msg: "Topic not found" });
     }
     const levels = await Level.findAll({
       where: {
@@ -63,10 +69,16 @@ exports.getLevelsByTopic = async (req, res, next) => {
       topic_name: topic.topic_name,
     }));
 
-    return res.status(200).json({ levels: levelsWithTopicName });
+    return res
+      .status(200)
+      .json({
+        status: true,
+        msg: "Level get successfully",
+        levels: levelsWithTopicName,
+      });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Something went wrong" });
+    return res.status(500).json({ status: false, msg: "Something went wrong" });
   }
 };
 
@@ -74,10 +86,12 @@ exports.getAllLevels = async (req, res, next) => {
   try {
     const levels = await Level.findAll();
 
-    return res.status(200).json({ levels });
+    return res
+      .status(200)
+      .json({ status: true, msg: "Level get successfully", levels });
   } catch (e) {
     console.error("Error in getAllLevels:", e);
-    return res.status(500).json({ msg: "Something went wrong" });
+    return res.status(500).json({ status: false, msg: "Something went wrong" });
   }
 };
 
@@ -89,7 +103,7 @@ exports.updateLevel = async (req, res, next) => {
     const existingLevel = await Level.findByPk(level_id);
 
     if (!existingLevel) {
-      return res.status(400).json({ msg: "Level not found" });
+      return res.status(400).json({ status: false, msg: "Level not found" });
     }
     let levelImageUrl = existingLevel.level_pic;
 
@@ -102,11 +116,15 @@ exports.updateLevel = async (req, res, next) => {
 
     await existingLevel.save();
 
-    return res
-      .status(200)
-      .json({ msg: "Level updated successfully", level: existingLevel });
+    return res.status(200).json({
+      status: true,
+      msg: "Level updated successfully",
+      level: existingLevel,
+    });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ status: false, msg: "Internal Server Error" });
   }
 };

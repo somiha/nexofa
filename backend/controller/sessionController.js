@@ -25,36 +25,96 @@ exports.addSession = async (req, res, next) => {
       return res.status(400).json({ msg: "Topic not found" });
     }
 
-    const numberOfLevels = await Level.count({
-      where: {
+    // Check if the user is premium and the conditions for a new session
+    console.log(existingUser.is_premium);
+    console.log(existingUser.session_created_at);
+
+    if (
+      existingUser.is_premium === false &&
+      (!existingUser.session_created_at ||
+        new Date(existingUser.session_created_at).getDate() !==
+          new Date().getDate() ||
+        new Date(existingUser.session_created_at).getMonth() !==
+          new Date().getMonth() ||
+        new Date(existingUser.session_created_at).getFullYear() !==
+          new Date().getFullYear())
+    ) {
+      const numberOfLevels = await Level.count({
+        where: {
+          topic_id: topic_id,
+        },
+      });
+
+      const newSession = await Session.create({
+        session_name: existingTopic.topic_name,
         topic_id: topic_id,
-      },
-    });
+        user_id: user_id,
+        description: existingTopic.topic_des,
+        completed: 0,
+        numberOfLevel: numberOfLevels,
+      });
 
-    const newSession = await Session.create({
-      session_name: existingTopic.topic_name,
-      topic_id: topic_id,
-      user_id: user_id,
-      description: existingTopic.topic_des,
-      completed: 0,
-      numberOfLevel: numberOfLevels,
-    });
+      // Update user's session_created_at to today's date
+      await existingUser.update({
+        session_created_at: new Date(),
+      });
 
-    const createdSession = await Session.findByPk(newSession.id);
+      const createdSession = await Session.findByPk(newSession.id);
 
-    const levels = await Level.findAll({
-      where: {
+      const levels = await Level.findAll({
+        where: {
+          topic_id: topic_id,
+        },
+      });
+
+      const sessionLevels = await createSessionLevels(levels, createdSession);
+
+      return res.status(200).json({
+        msg: "Session and levels created successfully",
+        session: createdSession,
+        levels: sessionLevels,
+      });
+    } else if (existingUser.is_premium === true) {
+      const numberOfLevels = await Level.count({
+        where: {
+          topic_id: topic_id,
+        },
+      });
+
+      const newSession = await Session.create({
+        session_name: existingTopic.topic_name,
         topic_id: topic_id,
-      },
-    });
+        user_id: user_id,
+        description: existingTopic.topic_des,
+        completed: 0,
+        numberOfLevel: numberOfLevels,
+      });
 
-    const sessionLevels = await createSessionLevels(levels, createdSession);
+      // Update user's session_created_at to today's date
+      await existingUser.update({
+        session_created_at: new Date(),
+      });
 
-    return res.status(200).json({
-      msg: "Session and levels created successfully",
-      session: createdSession,
-      levels: sessionLevels,
-    });
+      const createdSession = await Session.findByPk(newSession.id);
+
+      const levels = await Level.findAll({
+        where: {
+          topic_id: topic_id,
+        },
+      });
+
+      const sessionLevels = await createSessionLevels(levels, createdSession);
+
+      return res.status(200).json({
+        msg: "Session and levels created successfully",
+        session: createdSession,
+        levels: sessionLevels,
+      });
+    } else {
+      return res.status(200).json({
+        msg: "You have one SWOT analysis in the free service. Try premium for unlimited SWOT analysis.",
+      });
+    }
   } catch (e) {
     console.error(e);
 
@@ -67,6 +127,68 @@ exports.addSession = async (req, res, next) => {
     return res.status(500).json({ msg: "Something went wrong" });
   }
 };
+
+// Helper function to check if two dates have the same month and year
+
+// exports.addSession = async (req, res, next) => {
+//   try {
+//     const user_id = req.query.userId;
+//     const topic_id = req.query.topicId;
+
+//     const existingUser = await User.findByPk(user_id);
+
+//     if (!existingUser) {
+//       return res.status(400).json({ msg: "User not found" });
+//     }
+
+//     const existingTopic = await Topic.findByPk(topic_id);
+
+//     if (!existingTopic) {
+//       return res.status(400).json({ msg: "Topic not found" });
+//     }
+
+//     const numberOfLevels = await Level.count({
+//       where: {
+//         topic_id: topic_id,
+//       },
+//     });
+
+//     const newSession = await Session.create({
+//       session_name: existingTopic.topic_name,
+//       topic_id: topic_id,
+//       user_id: user_id,
+//       description: existingTopic.topic_des,
+//       completed: 0,
+//       numberOfLevel: numberOfLevels,
+//     });
+
+//     const createdSession = await Session.findByPk(newSession.id);
+
+//     const levels = await Level.findAll({
+//       where: {
+//         topic_id: topic_id,
+//       },
+//     });
+
+//     const sessionLevels = await createSessionLevels(levels, createdSession);
+
+//     return res.status(200).json({
+//       msg: "Session and levels created successfully",
+//       session: createdSession,
+//       levels: sessionLevels,
+//     });
+//   } catch (e) {
+//     console.error(e);
+
+//     if (e.name === "SequelizeForeignKeyConstraintError") {
+//       return res
+//         .status(400)
+//         .json({ msg: "Invalid user_id or topic_id. User or Topic not found." });
+//     }
+
+//     return res.status(500).json({ msg: "Something went wrong" });
+//   }
+// };
 
 async function createSessionLevels(levels, createdSession) {
   const sessionLevels = await Promise.all(

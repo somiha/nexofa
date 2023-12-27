@@ -29,6 +29,13 @@ module.exports = (sequelize, DataTypes) => {
       is_verified: {
         type: DataTypes.INTEGER,
       },
+      session_created_at: {
+        type: DataTypes.DATE,
+      },
+      is_premium: {
+        type: DataTypes.BOOLEAN,
+        default: 0,
+      },
     },
     {
       timestamps: true,

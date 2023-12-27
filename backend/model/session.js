@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     description: {
       type: DataTypes.STRING,
     },
+
     user_id: {
       type: DataTypes.INTEGER,
     },
@@ -17,6 +18,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     numberOfLevel: {
       type: DataTypes.INTEGER,
+    },
+    swot_pdf: {
+      type: DataTypes.STRING,
     },
   });
 

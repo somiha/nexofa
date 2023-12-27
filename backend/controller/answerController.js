@@ -10,10 +10,13 @@ const SessionLevel = db.sessionLevel;
 const Answer = db.answer;
 const baseUrl = process.env.baseUrl;
 const { Sequelize } = require("sequelize");
+const fsp = require("fs").promises;
 
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
+const path = require("path");
 const { log } = require("console");
+const puppeteer = require("puppeteer");
 
 // async function generateSessionLevelPDF(sessionLevelId, session_id, userId) {
 //   const sessionLevels = await SessionLevel.findAll({
@@ -66,8 +69,6 @@ const { log } = require("console");
 
 //   console.log(`PDF saved to: ${outputPath}`);
 // }
-
-const puppeteer = require("puppeteer");
 
 async function generateSessionLevelPDF(sessionLevelId, session_id, userId) {
   const sessionLevels = await SessionLevel.findAll({
@@ -243,38 +244,39 @@ h2 {
         ${generateSwotCard("Opportunities", questionsAndAnswers[3])}
         ${generateSwotCard("Threats", questionsAndAnswers[4])}
       </div>
-      <div class="footer-container">
-        <span>SWOT Editor is open source on <a href="https://git.io/vyqlq" target="_blank">GitHub</a></span>
-      </div>
+      
     </body>
   </html>
 `;
 
-  // Rest of the code remains unchanged
+  // const outputPath = `session_level_${sessionLevelId}_answers.pdf`;
+  const outputPath = `./public/pdf/uploads/${`session_${session_id}_answers.pdf`}`;
 
-  const outputPath = `session_level_${sessionLevelId}_answers.pdf`;
-
-  // Launch a headless browser
   const browser = await puppeteer.launch();
-
-  // Open a new page
   const page = await browser.newPage();
-
-  // Set the content of the page to the HTML template
   await page.setContent(htmlTemplate);
 
-  // Generate PDF
-
-  await page.screenshot({ path: "screenshot.png" });
+  // await page.screenshot({ path: "screenshot.png" });
   await page.pdf({ path: outputPath, format: "A4", printBackground: true });
 
-  // Close the browser
   await browser.close();
+  const pdfUrl = `${baseUrl}/pdf/uploads/${`session_${session_id}_answers.pdf`}`;
 
   console.log(`PDF saved to: ${outputPath}`);
-}
+  const session = await Session.findOne({
+    where: {
+      id: session_id,
+    },
+  });
 
-// Rest of the code (generateSwotCard, generateSwotContent) remains unchanged
+  if (session) {
+    session.swot_pdf = pdfUrl;
+    await session.save();
+    console.log("PDF path saved to the Session table");
+  } else {
+    console.error("Session not found");
+  }
+}
 
 function generateSwotCard(title, data) {
   return `
@@ -293,8 +295,8 @@ function generateSwotContent(data) {
   let content = "";
   for (let qnaItem of data) {
     let { question, answer } = qnaItem;
-    content += `<p><strong>Question:</strong> ${question}</p>`;
-    content += `<p><strong>Answer:</strong> ${answer}</p>`;
+    // content += `<p><strong>Question:</strong> ${question}</p>`;
+    content += `<p><strong>*</strong> ${answer}</p>`;
   }
   return content;
 }
@@ -413,7 +415,6 @@ async function getQuestionsAndAnswers(sessionLevelId, userId) {
   console.log("Question IDs:", questionIds);
 
   if (questionIds.length === 0) {
-    // No need to proceed with the next query if there are no question IDs.
     return [];
   }
 
@@ -438,7 +439,7 @@ exports.addAnswers = async (req, res, next) => {
     const session_level_id = req.query.session_level_id;
     const level_id = req.query.level_id;
     const user_id = req.query.user_id;
-    const { answers } = req.body;
+    const answers = req.body;
 
     const sessionLevel = await SessionLevel.findOne({
       where: {
@@ -449,10 +450,10 @@ exports.addAnswers = async (req, res, next) => {
     if (sessionLevel.level_id !== level_id) {
       return res
         .status(400)
-        .json({ msg: "this level not in this session level" });
+        .json({ status: false, msg: "this level not in this session level" });
     }
 
-    console.log(answers, session_level_id, user_id);
+    // console.log(answers, session_level_id, user_id);
 
     await saveAnswer(answers, session_level_id, user_id);
 
@@ -480,30 +481,81 @@ exports.addAnswers = async (req, res, next) => {
       await generateSessionLevelPDF(session_level_id, session.id, user_id);
     }
 
-    return res.status(200).json({ msg: "Answer saved successfully" });
+    return res.status(200).json({
+      status: true,
+      msg: "Answer saved successfully",
+      answers: JSON.parse(answers.answers),
+    });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ status: false, msg: "Internal Server Error" });
   }
 };
 
 async function saveAnswer(answers, session_level_id, user_id) {
-  await Promise.all(
-    answers.map(async (answer) => {
-      return await Answer.create({
-        question_id: answer.question_id,
-        user_id,
-        answer: answer.answer,
-        session_level_id,
-      });
-    })
-  );
+  try {
+    console.log(1);
+
+    const data = answers;
+    const parsedData = JSON.parse(data.answers);
+    const answersArray = parsedData.answers;
+
+    if (Array.isArray(answersArray) && answersArray.length > 0) {
+      console.log(2);
+      // Process each answer
+      for (const [index, answer] of answersArray.entries()) {
+        const questionId = answer.question_id;
+        const answerText = answer.answer;
+
+        // Save to the database or perform any other necessary action
+        // For demonstration purposes, we'll just log the data
+        console.log(
+          `Answer ${
+            index + 1
+          }: Question ID - ${questionId}, Answer - ${answerText}`
+        );
+
+        // Create and save an Answer for each element in the answers array
+        await Answer.create({
+          question_id: questionId,
+          user_id,
+          answer: answerText,
+          session_level_id,
+        });
+      }
+
+      console.log("Answers saved successfully");
+    }
+  } catch (error) {
+    console.error("Error saving answers:", error);
+    // Handle the error or return accordingly
+  }
 }
+
+// async function saveAnswer(answers, session_level_id, user_id) {
+//   await Promise.all(
+//     answers.map(async (answer) => {
+//       return await Answer.create({
+//         question_id: answer.question_id,
+//         user_id,
+//         answer: answer.answer,
+//         session_level_id,
+//       });
+//     })
+//   );
+// }
 
 exports.getAnswersBySessionLevelId = async (req, res, next) => {
   try {
     const session_level_id = req.query.session_level_id;
-
+    if (!session_level_id) {
+      return res.status(400).json({
+        status: false,
+        msg: "Session level ID is missing in the request",
+      });
+    }
     const answers = await Answer.findAll({
       where: {
         session_level_id: session_level_id,
@@ -511,24 +563,36 @@ exports.getAnswersBySessionLevelId = async (req, res, next) => {
       include: [
         {
           model: Question,
-          attributes: ["question"], // Adjust the attributes as needed
+          attributes: ["question"],
         },
         {
           model: SessionLevel,
-          attributes: ["level_id"], // Include the level_name attribute
+          attributes: ["level_id"],
           include: [
             {
               model: Level,
-              attributes: ["level_name"], // Include the level_name attribute
+              attributes: ["level_name"],
             },
           ],
         },
       ],
     });
+    if (answers.length === 0) {
+      return res.status(404).json({
+        status: false,
+        msg: "No answers found for the provided session level ID",
+      });
+    }
     console.log(answers);
-    return res.status(200).json({ answers: answers });
+    return res.status(200).json({
+      status: true,
+      msg: "Get Answer By Session Level",
+      answers: answers,
+    });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ status: false, msg: "Internal Server Error" });
   }
 };
