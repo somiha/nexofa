@@ -36,12 +36,15 @@ exports.register = async (req, res, next) => {
 
     if (user.length) {
       return res.status(400).json({
+        status: false,
         msg: "User is already exist with this phone or email. Try new email and phone number",
       });
     }
 
     if (password !== confirmedPaword) {
-      return res.status(400).json({ msg: "Password doesn't match." });
+      return res
+        .status(400)
+        .json({ status: false, msg: "Password doesn't match." });
     }
 
     let hashPassword = await bcrypt.hash(password, 10);
@@ -61,12 +64,16 @@ exports.register = async (req, res, next) => {
     });
 
     if (newUser) {
-      return res
-        .status(200)
-        .json({ msg: "User has been created successfully.", user: newUser });
+      return res.status(200).json({
+        status: true,
+        msg: "User has been created successfully.",
+        user: newUser,
+      });
     }
   } catch (err) {
-    return res.status(500).json({ msg: "Account Creation Failed." });
+    return res
+      .status(500)
+      .json({ status: false, msg: "Account Creation Failed." });
   }
 };
 
@@ -85,20 +92,24 @@ exports.login = async (req, res, next) => {
     if (!user) {
       return res
         .status(400)
-        .json({ msg: "User with this phone does not exist!" });
+        .json({ status: false, msg: "User with this phone does not exist!" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(400).json({ msg: "Incorrect password." });
+      return res
+        .status(400)
+        .json({ status: false, msg: "Incorrect password." });
     }
 
     const token = jwt.sign({ id: user.id, name: user.name }, seacret);
 
-    return res.status(200).json({ token, user: user });
+    return res
+      .status(200)
+      .json({ status: true, msg: "log in successfully", token, user: user });
   } catch (err) {
-    return res.status(500).json({ msg: "something wrong" });
+    return res.status(500).json({ status: false, msg: "something wrong" });
   }
 };
 
@@ -113,17 +124,23 @@ exports.updatePassword = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(401).json({ msg: "You are not authorized." });
+      return res
+        .status(401)
+        .json({ status: false, msg: "You are not authorized." });
     }
 
     const isMatch = await bcrypt.compare(previous_password, user.password);
 
     if (!isMatch) {
-      return res.status(400).json({ msg: "Provide correct password." });
+      return res
+        .status(400)
+        .json({ status: false, msg: "Provide correct password." });
     }
 
     if (new_password !== confirmed_password) {
-      return res.status(400).json({ msg: "Password did't match." });
+      return res
+        .status(400)
+        .json({ status: false, msg: "Password did't match." });
     }
 
     let hashPassword = await bcrypt.hash(new_password, 10);
@@ -137,9 +154,11 @@ exports.updatePassword = async (req, res, next) => {
       }
     );
 
-    return res
-      .status(200)
-      .json({ msg: "Password has been updated successfully.", user: user });
+    return res.status(200).json({
+      status: true,
+      msg: "Password has been updated successfully.",
+      user: user,
+    });
   } catch (err) {
     console.log(err);
     return res.status(500).json({
@@ -163,7 +182,9 @@ exports.updateProfile = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(401).json({ msg: "You are not authorized." });
+      return res
+        .status(401)
+        .json({ status: false, msg: "You are not authorized." });
     }
 
     user.name = name || user.name;
@@ -171,7 +192,6 @@ exports.updateProfile = async (req, res, next) => {
     user.mobile_number = mobile_number || user.mobile_number;
     user.country = country || user.country;
 
-    // Handle profile picture update
     const profile_pic = req.files["profile_pic"];
 
     if (profile_pic && profile_pic.length > 0) {
@@ -186,20 +206,18 @@ exports.updateProfile = async (req, res, next) => {
           path.basename(user.profile_pic)
         );
 
-        // Delete old profile picture if exists
         await fs.unlink(profilePicPath);
       }
-
-      // Save new profile picture path to the user
       user.profile_pic = profileImageUrl;
     }
 
-    // Save the updated user profile
     await user.save();
 
-    return res
-      .status(200)
-      .json({ msg: "Profile has been updated successfully.", user: user });
+    return res.status(200).json({
+      status: true,
+      msg: "Profile has been updated successfully.",
+      user: user,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({
@@ -218,7 +236,9 @@ exports.forgetPasswordSentCode = async (req, res, next) => {
     });
 
     if (!user) {
-      return req.status(200).json({ msg: "User Not Found with this email." });
+      return req
+        .status(200)
+        .json({ status: false, msg: "User Not Found with this email." });
     }
     // const verification_code = Math.floor(1000 + Math.random() * 9000);
     const verification_code = "1234";
@@ -227,10 +247,13 @@ exports.forgetPasswordSentCode = async (req, res, next) => {
 
     await user.save();
 
-    return res.status(200).json({ msg: "Code has been sent to your email." });
+    return res
+      .status(200)
+      .json({ status: true, msg: "Code has been sent to your email." });
   } catch (err) {
     console.error(err);
     return res.status(500).json({
+      status: false,
       msg: "Something went wrong. Please try again with correct information.",
     });
   }
@@ -246,17 +269,22 @@ exports.confirmCode = async (req, res, next) => {
     });
 
     if (!user) {
-      return req.status(200).json({ msg: "User Not Found with this email." });
+      return req
+        .status(200)
+        .json({ status: false, msg: "User Not Found with this email." });
     }
 
     if (user.verification_code != code) {
-      return res.status(400).json({ msg: "Invalid Code" });
+      return res.status(400).json({ status: false, msg: "Invalid Code" });
     }
 
-    return res.status(200).json({ msg: "Successfully verified user." });
+    return res
+      .status(200)
+      .json({ status: true, msg: "Successfully verified user." });
   } catch (err) {
     console.error(err);
     return res.status(500).json({
+      status: false,
       msg: "Something went wrong. Please try again with correct information.",
     });
   }
@@ -272,11 +300,15 @@ exports.createPassword = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(401).json({ msg: "No user found with this email." });
+      return res
+        .status(401)
+        .json({ status: false, msg: "No user found with this email." });
     }
 
     if (new_password !== confirmed_password) {
-      return res.status(400).json({ msg: "Password did't match." });
+      return res
+        .status(400)
+        .json({ status: false, msg: "Password did't match." });
     }
 
     let hashPassword = await bcrypt.hash(new_password, 10);
@@ -291,12 +323,14 @@ exports.createPassword = async (req, res, next) => {
     );
 
     return res.status(200).json({
+      status: true,
       msg: "Password has been updated successfully.",
       user: updatedUser,
     });
   } catch (err) {
     console.log(err);
     return res.status(500).json({
+      status: false,
       msg: "Something went wrong. Please try again with correct information.",
     });
   }

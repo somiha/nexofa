@@ -70,14 +70,18 @@ exports.addQuestion = async (req, res, next) => {
     console.log("Fetched level:", level.dataValues.topic_id);
 
     if (level.dataValues.topic_id != topic_id) {
-      return res.status(400).json({ msg: "This level is not in this topic" });
+      return res
+        .status(400)
+        .json({ status: false, msg: "This level is not in this topic" });
     }
 
     const existingTopic = await Topic.findByPk(topic_id);
     const existingLevel = await Level.findByPk(level_id);
 
     if (!existingTopic || !existingLevel) {
-      return res.status(400).json({ msg: "Topic/Level not found" });
+      return res
+        .status(400)
+        .json({ status: false, msg: "Topic/Level not found" });
     }
 
     const newQuestion = await Question.create({
@@ -91,12 +95,15 @@ exports.addQuestion = async (req, res, next) => {
     newQuestion.suggested_answers = JSON.parse(newQuestion.suggested_answers);
 
     return res.status(200).json({
+      status: true,
       msg: "Question created successfully",
       question: newQuestion,
     });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ status: false, msg: "Internal Server Error" });
   }
 };
 
@@ -157,14 +164,23 @@ exports.getQuestionsByLevel = async (req, res, next) => {
 
     if (formattedQuestions.length === 0) {
       return res.status(404).json({
+        status: false,
         msg: "No questions found for the specified level and topic.",
       });
     }
 
-    return res.status(200).json({ questions: formattedQuestions });
+    return res
+      .status(200)
+      .json({
+        status: false,
+        msg: "get question by levelwise successfully",
+        questions: formattedQuestions,
+      });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ status: false, msg: "Internal Server Error" });
   }
 };
 

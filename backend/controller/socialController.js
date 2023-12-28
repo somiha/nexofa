@@ -13,21 +13,31 @@ exports.addSocial = async (req, res, next) => {
       url,
     });
 
-    return res
-      .status(200)
-      .json({ msg: "Social Media created successfully", social: newSocial });
+    return res.status(200).json({
+      status: true,
+      msg: "Social Media created successfully",
+      social: newSocial,
+    });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ status: false, msg: "Internal Server Error" });
   }
 };
 
 exports.getAllSocials = async (req, res, next) => {
   try {
     const socials = await Social.findAll();
-    return res.status(200).json({ socials });
+    return res
+      .status(200)
+      .json({
+        status: true,
+        msg: "get all social media link successfully",
+        socials,
+      });
   } catch (err) {
-    return res.status(500).json({ msg: "Something went wrong" });
+    return res.status(500).json({ status: false, msg: "Something went wrong" });
   }
 };
 
@@ -39,7 +49,7 @@ exports.updateSocial = async (req, res, next) => {
     const existingSocial = await Social.findByPk(social_id);
 
     if (!existingSocial) {
-      return res.status(400).json({ msg: "Social not found" });
+      return res.status(400).json({ status: false, msg: "Social not found" });
     }
 
     existingSocial.name = name;
@@ -47,11 +57,15 @@ exports.updateSocial = async (req, res, next) => {
 
     await existingSocial.save();
 
-    return res
-      .status(200)
-      .json({ msg: "Social updated successfully", social: existingSocial });
+    return res.status(200).json({
+      status: true,
+      msg: "Social updated successfully",
+      social: existingSocial,
+    });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ status: false, msg: "Internal Server Error" });
   }
 };

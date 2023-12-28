@@ -84,6 +84,10 @@ db.sessionLevel.belongsTo(db.level, {
   foreignKey: "level_id",
   onDelete: "CASCADE",
 });
+db.level.belongsTo(db.topic, {
+  foreignKey: "topic_id",
+  onDelete: "CASCADE",
+});
 
 db.question.belongsTo(db.level, {
   foreignKey: "level_id",

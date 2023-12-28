@@ -16,16 +16,15 @@ exports.addSession = async (req, res, next) => {
     const existingUser = await User.findByPk(user_id);
 
     if (!existingUser) {
-      return res.status(400).json({ msg: "User not found" });
+      return res.status(400).json({ status: false, msg: "User not found" });
     }
 
     const existingTopic = await Topic.findByPk(topic_id);
 
     if (!existingTopic) {
-      return res.status(400).json({ msg: "Topic not found" });
+      return res.status(400).json({ status: false, msg: "Topic not found" });
     }
 
-    // Check if the user is premium and the conditions for a new session
     console.log(existingUser.is_premium);
     console.log(existingUser.session_created_at);
 
@@ -54,7 +53,6 @@ exports.addSession = async (req, res, next) => {
         numberOfLevel: numberOfLevels,
       });
 
-      // Update user's session_created_at to today's date
       await existingUser.update({
         session_created_at: new Date(),
       });
@@ -70,6 +68,7 @@ exports.addSession = async (req, res, next) => {
       const sessionLevels = await createSessionLevels(levels, createdSession);
 
       return res.status(200).json({
+        status: true,
         msg: "Session and levels created successfully",
         session: createdSession,
         levels: sessionLevels,
@@ -90,7 +89,6 @@ exports.addSession = async (req, res, next) => {
         numberOfLevel: numberOfLevels,
       });
 
-      // Update user's session_created_at to today's date
       await existingUser.update({
         session_created_at: new Date(),
       });
@@ -106,12 +104,14 @@ exports.addSession = async (req, res, next) => {
       const sessionLevels = await createSessionLevels(levels, createdSession);
 
       return res.status(200).json({
+        status: true,
         msg: "Session and levels created successfully",
         session: createdSession,
         levels: sessionLevels,
       });
     } else {
       return res.status(200).json({
+        status: false,
         msg: "You have one SWOT analysis in the free service. Try premium for unlimited SWOT analysis.",
       });
     }
@@ -119,12 +119,13 @@ exports.addSession = async (req, res, next) => {
     console.error(e);
 
     if (e.name === "SequelizeForeignKeyConstraintError") {
-      return res
-        .status(400)
-        .json({ msg: "Invalid user_id or topic_id. User or Topic not found." });
+      return res.status(400).json({
+        status: false,
+        msg: "Invalid user_id or topic_id. User or Topic not found.",
+      });
     }
 
-    return res.status(500).json({ msg: "Something went wrong" });
+    return res.status(500).json({ status: false, msg: "Something went wrong" });
   }
 };
 
@@ -209,12 +210,14 @@ exports.getSessionsByUserTopic = async (req, res, next) => {
     const topic_id = req.query.topic_id;
 
     if (!userId) {
-      return res.status(400).json({ msg: "User ID not provided" });
+      return res
+        .status(400)
+        .json({ status: false, msg: "User ID not provided" });
     }
     const user = await User.findByPk(userId);
 
     if (!user) {
-      return res.status(400).json({ msg: "User not found" });
+      return res.status(400).json({ status: false, msg: "User not found" });
     }
 
     console.log("here");
@@ -228,10 +231,12 @@ exports.getSessionsByUserTopic = async (req, res, next) => {
 
     console.log({ sessions });
 
-    return res.status(200).json({ sessions });
+    return res
+      .status(200)
+      .json({ status: true, msg: "get sessions successfully", sessions });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Something went wrong" });
+    return res.status(500).json({ status: false, msg: "Something went wrong" });
   }
 };
 
@@ -240,12 +245,14 @@ exports.getSessionsByTopicId = async (req, res, next) => {
     const topicId = req.query.topicId;
 
     if (!topicId) {
-      return res.status(400).json({ msg: "Topic ID not provided" });
+      return res
+        .status(400)
+        .json({ status: false, msg: "Topic ID not provided" });
     }
     const topic = await Topic.findByPk(topicId);
 
     if (!topic) {
-      return res.status(400).json({ msg: "Topic not found" });
+      return res.status(400).json({ status: false, msg: "Topic not found" });
     }
     const sessions = await Session.findAll({
       where: {
@@ -259,10 +266,14 @@ exports.getSessionsByTopicId = async (req, res, next) => {
       topic_name: topic.topic_name,
     }));
 
-    return res.status(200).json({ sessions: sessionsWithTopicName });
+    return res.status(200).json({
+      status: true,
+      msg: "get all sessions by topicwise",
+      sessions: sessionsWithTopicName,
+    });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Something went wrong" });
+    return res.status(500).json({ status: false, msg: "Something went wrong" });
   }
 };
 
@@ -291,10 +302,14 @@ exports.getAllSessions = async (req, res, next) => {
         : null,
     }));
 
-    return res.status(200).json({ sessions: sessionsWithTopicName });
+    return res.status(200).json({
+      status: true,
+      msg: "get all sessions susccessfully",
+      sessions: sessionsWithTopicName,
+    });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Something went wrong" });
+    return res.status(500).json({ status: false, msg: "Something went wrong" });
   }
 };
 
@@ -303,19 +318,21 @@ exports.getCompletedSessionsByUserId = async (req, res, next) => {
     const userId = req.query.userId;
 
     if (!userId) {
-      return res.status(400).json({ msg: "User ID not provided" });
+      return res
+        .status(400)
+        .json({ status: false, msg: "User ID not provided" });
     }
     const user = await User.findByPk(userId);
 
     if (!user) {
-      return res.status(400).json({ msg: "User not found" });
+      return res.status(400).json({ status: false, msg: "User not found" });
     }
+
     const sessions = await Session.findAll({
       where: {
         user_id: userId,
-        completed: 100,
       },
-      order: [["createdAt", "DESC"]],
+      order: [[Sequelize.literal(`completed / numberOfLevel * 100`), "ASC"]],
     });
 
     const topicIds = sessions.map((session) => session.topic_id);
@@ -338,10 +355,14 @@ exports.getCompletedSessionsByUserId = async (req, res, next) => {
         : null,
     }));
 
-    return res.status(200).json({ sessions: sessionsWithTopicName });
+    return res.status(200).json({
+      status: true,
+      msg: "get sessions successfully",
+      sessions: sessionsWithTopicName,
+    });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Something went wrong" });
+    return res.status(500).json({ status: false, msg: "Something went wrong" });
   }
 };
 
@@ -353,7 +374,7 @@ exports.updateSession = async (req, res, next) => {
     const existingSession = await Session.findByPk(session_id);
 
     if (!existingSession) {
-      return res.status(400).json({ msg: "Level not found" });
+      return res.status(400).json({ status: false, msg: "Level not found" });
     }
 
     existingSession.session_name = session_name;
@@ -361,11 +382,15 @@ exports.updateSession = async (req, res, next) => {
 
     await existingSession.save();
 
-    return res
-      .status(200)
-      .json({ msg: "Session updated successfully", session: existingSession });
+    return res.status(200).json({
+      status: true,
+      msg: "Session updated successfully",
+      session: existingSession,
+    });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ status: false, msg: "Internal Server Error" });
   }
 };

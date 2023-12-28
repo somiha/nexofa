@@ -12,10 +12,13 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
       },
       is_pinned: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BOOLEAN,
       },
       is_global: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BOOLEAN,
+      },
+      is_new: {
+        type: DataTypes.BOOLEAN,
       },
     },
     {

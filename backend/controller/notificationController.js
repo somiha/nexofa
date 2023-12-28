@@ -4,7 +4,7 @@ const { Op } = require("sequelize");
 
 exports.addNotification = async (req, res, next) => {
   try {
-    const { title, description, isGlobal, userId, isPinned } = req.body;
+    const { title, description, isGlobal, userId, isPinned, isNew } = req.body;
     if (userId === undefined) {
       userId = null;
     }
@@ -15,9 +15,11 @@ exports.addNotification = async (req, res, next) => {
       is_global: isGlobal,
       is_pinned: isPinned,
       user_id: userId,
+      is_new: isNew,
     });
 
     return res.status(200).json({
+      status: true,
       msg: "Notification created successfully",
       data: {
         notification: newNotification,
@@ -25,7 +27,9 @@ exports.addNotification = async (req, res, next) => {
     });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ status: false, msg: "Internal Server Error" });
   }
 };
 
@@ -34,7 +38,9 @@ exports.getNotificationByUser = async (req, res, next) => {
     const user_id = req.query.user_id;
 
     if (!user_id) {
-      return res.status(400).json({ msg: "User ID not provided" });
+      return res
+        .status(400)
+        .json({ status: false, msg: "User ID not provided" });
     }
 
     const notifications = await Notification.findAll({
@@ -43,19 +49,23 @@ exports.getNotificationByUser = async (req, res, next) => {
       },
       order: [
         ["is_pinned", "DESC"],
-        ["created_at", "DESC"],
+        ["createdAt", "DESC"],
       ],
     });
 
-    if (!notifications || packages.length === 0) {
+    if (!notifications || notifications.length === 0) {
       return res
         .status(404)
         .json({ msg: "No notification found for the user" });
     }
 
-    return res.status(200).json({ packages: notifications });
+    return res.status(200).json({
+      status: true,
+      msg: "get notification by user successfully",
+      notifications: notifications,
+    });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Something went wrong" });
+    return res.status(500).json({ status: false, msg: "Something went wrong" });
   }
 };

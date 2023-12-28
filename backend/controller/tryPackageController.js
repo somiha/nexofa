@@ -15,7 +15,9 @@ exports.addTryPackage = async (req, res, next) => {
     });
 
     if (existingPackage) {
-      return res.status(400).json({ msg: "User already has a package" });
+      return res
+        .status(400)
+        .json({ status: false, msg: "User already has a package" });
     }
     const newTryPackage = await tryPackage.create({
       package_name,
@@ -25,12 +27,16 @@ exports.addTryPackage = async (req, res, next) => {
       user_id: user_id,
     });
 
-    return res
-      .status(200)
-      .json({ msg: "Package created successfully", package: newTryPackage });
+    return res.status(200).json({
+      status: true,
+      msg: "Package created successfully",
+      package: newTryPackage,
+    });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ status: false, msg: "Internal Server Error" });
   }
 };
 
@@ -39,7 +45,9 @@ exports.getTryPackageByUser = async (req, res, next) => {
     const user_id = req.query.user_id;
 
     if (!user_id) {
-      return res.status(400).json({ msg: "User ID not provided" });
+      return res
+        .status(400)
+        .json({ status: false, msg: "User ID not provided" });
     }
 
     const tryPackages = await tryPackage.findAll({
@@ -55,13 +63,21 @@ exports.getTryPackageByUser = async (req, res, next) => {
     });
 
     if (!tryPackages || tryPackages.length === 0) {
-      return res.status(404).json({ msg: "No packages found for the user" });
+      return res
+        .status(404)
+        .json({ status: false, msg: "No packages found for the user" });
     }
 
-    return res.status(200).json({ packages: tryPackages });
+    return res
+      .status(200)
+      .json({
+        status: true,
+        msg: "get packages by user successfully",
+        packages: tryPackages,
+      });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Something went wrong" });
+    return res.status(500).json({ status: false, msg: "Something went wrong" });
   }
 };
 
@@ -75,8 +91,14 @@ exports.getAllTryPackages = async (req, res, next) => {
         },
       ],
     });
-    return res.status(200).json({ tryPackages });
+    return res
+      .status(200)
+      .json({
+        status: true,
+        msg: "get all packages successfully",
+        tryPackages,
+      });
   } catch (err) {
-    return res.status(500).json({ msg: "Something went wrong" });
+    return res.status(500).json({ status: false, msg: "Something went wrong" });
   }
 };

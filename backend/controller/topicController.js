@@ -21,21 +21,29 @@ exports.addTopic = async (req, res, next) => {
       topic_des,
     });
 
-    return res
-      .status(200)
-      .json({ msg: "Topic created successfully", topic: newTopic });
+    return res.status(200).json({
+      status: true,
+      msg: "Topic created successfully",
+      topic: newTopic,
+    });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ status: false, msg: "Internal Server Error" });
   }
 };
 
 exports.getAllTopics = async (req, res, next) => {
   try {
     const topics = await Topic.findAll();
-    return res.status(200).json({ topics });
+    return res.status(200).json({
+      status: true,
+      msg: "get all topics successfully",
+      topics: topics,
+    });
   } catch (err) {
-    return res.status(500).json({ msg: "Something went wrong" });
+    return res.status(500).json({ status: false, msg: "Something went wrong" });
   }
 };
 
@@ -48,7 +56,7 @@ exports.updateTopic = async (req, res, next) => {
     const existingTopic = await Topic.findByPk(topic_id);
 
     if (!existingTopic) {
-      return res.status(400).json({ msg: "Topic not found" });
+      return res.status(400).json({ status: false, msg: "Topic not found" });
     }
 
     let topicImageUrl = existingTopic.topic_pic;
@@ -63,11 +71,15 @@ exports.updateTopic = async (req, res, next) => {
 
     await existingTopic.save();
 
-    return res
-      .status(200)
-      .json({ msg: "Topic updated successfully", topic: existingTopic });
+    return res.status(200).json({
+      status: true,
+      msg: "Topic updated successfully",
+      topic: existingTopic,
+    });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ status: false, msg: "Internal Server Error" });
   }
 };
