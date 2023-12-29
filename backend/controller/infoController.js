@@ -6,7 +6,7 @@ const baseUrl = process.env.baseUrl;
 
 exports.addInfo = async (req, res, next) => {
   try {
-    const { terms_policy, about_us } = req.body;
+    const { terms_policy, about_us, written_instruction } = req.body;
     const how_to_use_app = req.file;
     let videoUrl = null;
 
@@ -18,6 +18,7 @@ exports.addInfo = async (req, res, next) => {
       terms_policy,
       about_us,
       how_to_use_app: videoUrl,
+      written_instruction,
     });
 
     return res
@@ -90,6 +91,28 @@ exports.getAboutUs = async (req, res, next) => {
       status: true,
       msg: "get about us successfully",
       about_us: aboutUsList,
+    });
+  } catch (e) {
+    console.error(e);
+    return res
+      .status(500)
+      .json({ status: false, msg: "Internal Server Error" });
+  }
+};
+
+exports.getWrittenInstruction = async (req, res, next) => {
+  try {
+    const infoList = await Info.findAll();
+
+    if (!infoList || infoList.length === 0) {
+      return res.status(404).json({ status: false, msg: "Info not found" });
+    }
+    const writtenInstruction = infoList.map((info) => info.written_instruction);
+
+    return res.status(200).json({
+      status: true,
+      msg: "get about us successfully",
+      written_instruction: writtenInstruction,
     });
   } catch (e) {
     console.error(e);

@@ -599,72 +599,67 @@ exports.getAnswersBySessionLevelId = async (req, res, next) => {
 
 exports.getAnswersByTopicAndLevel = async (req, res, next) => {
   try {
-    const { topic_id, level_id } = req.query;
+    const { topic_id, level_id, user_id, session_id } = req.query;
 
-    if (!topic_id || !level_id) {
+    if (!topic_id || !level_id || !user_id || !session_id) {
       return res.status(400).json({
         status: false,
-        msg: "Topic ID and Level ID are required in the request",
+        msg: "Topic ID, Level ID, user Id and session ID  are required in the request",
       });
     }
+
+    const questions = await Question.findAll({
+      where: {
+        topic_id: topic_id,
+        level_id: level_id,
+      },
+    });
+
+    const extractedQuestions = questions.map((question) => question.get());
+
+    const sessionLevel = await SessionLevel.findOne({
+      where: {
+        session_id: session_id,
+        level_id: level_id,
+      },
+    });
 
     const answers = await Answer.findAll({
       where: {
-        "$session_level.level_id$": level_id,
-        "$session_level.level.topic_id$": topic_id,
+        session_level_id: sessionLevel.id,
       },
-      include: [
-        {
-          model: SessionLevel,
-          attributes: [],
-          include: [
-            {
-              model: Level,
-              attributes: ["id", "level_name"],
-              where: {
-                id: level_id,
-                topic_id: topic_id,
-              },
-              include: [
-                {
-                  model: Topic,
-                  attributes: ["id", "topic_name"],
-                },
-              ],
-            },
-          ],
-        },
-        {
-          model: Question,
-          attributes: ["question"],
-        },
-      ],
     });
 
-    if (answers.length === 0) {
-      return res.status(404).json({
-        status: false,
-        msg: "No answers found for the provided topic and level",
-      });
-    }
+    const extractedAnswers = answers.map((answer) => answer.get());
 
-    console.log(answers);
+    const mergedResult = extractedQuestions.map((question) => {
+      const matchingAnswer = extractedAnswers.find(
+        (answer) => answer.question_id === question.id
+      );
 
-    const response = answers.map((answer) => {
-      return {
-        question: answer.question,
-        topic: answer.session_level.level
-          ? answer.session_level.level.topic
-          : null,
-        level: answer.session_level.level,
-        session_level: answer.session_level,
-      };
+      // If there is a matching answer, merge the data
+      if (matchingAnswer) {
+        return {
+          question: question.question,
+          suggested_answers: JSON.parse(question.suggested_answers),
+          topic_id: question.topic_id,
+          level_id: question.level_id,
+          question_id: matchingAnswer.question_id,
+          user_id: matchingAnswer.user_id,
+          answer: matchingAnswer.answer,
+          session_level_id: matchingAnswer.session_level_id,
+        };
+      }
+
+      // If there is no matching answer, return the original question
+      return question;
     });
 
+    console.log("mergedResult", mergedResult);
     return res.status(200).json({
       status: true,
       msg: "Get Answers By Topic and Level",
-      answers: response,
+      answers: mergedResult,
     });
   } catch (e) {
     console.error(e);

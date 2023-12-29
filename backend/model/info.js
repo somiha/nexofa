@@ -9,6 +9,9 @@ module.exports = (sequelize, DataTypes) => {
     how_to_use_app: {
       type: DataTypes.STRING,
     },
+    written_instruction: {
+      type: DataTypes.TEXT,
+    },
   });
 
   return Info;
